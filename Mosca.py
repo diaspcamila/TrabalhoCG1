@@ -1,4 +1,5 @@
 from Animal import Animal
+from Graficos import setMosca
 
 class Mosca(Animal):
     def predar(self, plantas, animais):
@@ -8,3 +9,6 @@ class Mosca(Animal):
                     plantas.remove(planta) #mata a planta
                     self.energia += 300 #ganha energia
                     break
+    
+    def desenhar(self, tela):
+        setMosca(tela, self.x, self.y, self.fase)

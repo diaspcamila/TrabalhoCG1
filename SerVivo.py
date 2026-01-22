@@ -13,6 +13,10 @@ class SerVivo:
         self.x = x
         self.y = y
         self.energia = self.energia_padrao
+        self.fase = 0
+
+    def atualizar(self):
+        self.fase += 0.5
 
     def gastarEnergia(self) -> StatusEnergia:
         if self.energia > self.energia_reproducao: #so reproduzir se tiver energia o suficiente

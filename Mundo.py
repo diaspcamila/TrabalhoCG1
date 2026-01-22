@@ -34,10 +34,10 @@ class Mundo:
         self.tela.fill((255, 255, 255))
         # plantas em verde
         for p in self.plantas:
-            setMosca(self.tela, p.x, p.y, (0, 230, 0))
+            p.desenhar(self.tela)
         # animais em preto
         for a in self.animais:
-            setMosca(self.tela, a.x, a.y, (0, 0, 0))
+            a.desenhar(self.tela)
         pygame.display.flip()
 
     def adicionar_planta(self, planta: Planta):
@@ -81,6 +81,7 @@ class Mundo:
             elif res.status is EnergiaStatus.MORTO:
                 animais_mortos.append(a)
 
+            a.atualizar()
             a.mover(self.plantas, self.animais)
             a.predar(self.plantas, self.animais)
 

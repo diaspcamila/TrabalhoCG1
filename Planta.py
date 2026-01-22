@@ -1,5 +1,6 @@
 import pygame
 from SerVivo import *
+from Graficos import setPlanta
 
 class Planta(SerVivo):
     alcance_vizinhos = SerVivo.escala * 2
@@ -15,3 +16,6 @@ class Planta(SerVivo):
                 vizinhos += 1
         if vizinhos < 4:
             self.energia += 20
+
+    def desenhar(self, tela):
+        setPlanta(tela, self.x, self.y)

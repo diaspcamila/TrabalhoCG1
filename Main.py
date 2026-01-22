@@ -6,6 +6,8 @@ from Planta import Planta
 from Mosca import Mosca
 
 def main():
+    pygame.init()
+
     # Configurações do mundo
     largura, altura, escala = 1000, 800, 20
     mundo = Mundo(largura=largura, altura=altura, escala=escala, seed=4)
