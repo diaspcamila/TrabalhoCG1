@@ -5,6 +5,8 @@ from Graficos import setMosca
 from SerVivo import SerVivo
 from Planta import Planta
 from Animal import Animal
+from Presa import Presa
+from Predador import Predador
 
 class Mundo:
     #seed bom p debug
@@ -37,7 +39,10 @@ class Mundo:
             setMosca(self.tela, p.x, p.y, (0, 230, 0))
         # animais em preto
         for a in self.animais:
-            setMosca(self.tela, a.x, a.y, (0, 0, 0))
+            if type(a) is Presa:
+                setMosca(self.tela, a.x, a.y, (0, 0, 0))
+            else:
+                setMosca(self.tela, a.x, a.y, (200, 0, 0))
         pygame.display.flip()
 
     def adicionar_planta(self, planta: Planta):
@@ -49,7 +54,7 @@ class Mundo:
     def _spawn_filho(self, pai):
         filho = type(pai)(pai.x, pai.y)
         if hasattr(filho, 'fotossintese'):
-            for i in range(3):
+            for i in range(2):
                 filho.mover(self.plantas, self.animais)
         else:
             filho.mover(self.plantas, self.animais)

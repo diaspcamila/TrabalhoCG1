@@ -3,27 +3,33 @@ import random
 import pygame
 from Mundo import Mundo
 from Planta import Planta
-from Mosca import Mosca
+from Presa import Presa
+from Predador import Predador
 
 def main():
     # Configurações do mundo
     largura, altura, escala = 1000, 800, 20
-    mundo = Mundo(largura=largura, altura=altura, escala=escala, seed=4)
+    mundo = Mundo(largura=largura, altura=altura, escala=escala, seed=1)
     mundo.configurar_tela("EcoSim")
 
     # População inicial
     max_cx = (largura // escala) - 1
     max_cy = (altura // escala) - 1
 
-    for _ in range(10):
+    for _ in range(25):
         x = random.randint(1, max_cx) * escala
         y = random.randint(1, max_cy) * escala
         mundo.adicionar_planta(Planta(x, y))
 
+    for _ in range(12):
+        x = random.randint(1, max_cx) * escala
+        y = random.randint(1, max_cy) * escala
+        mundo.adicionar_animal(Presa(x, y))
+
     for _ in range(5):
         x = random.randint(1, max_cx) * escala
         y = random.randint(1, max_cy) * escala
-        mundo.adicionar_animal(Mosca(x, y))
+        mundo.adicionar_animal(Predador(x, y))
 
     # Loop
     clock = pygame.time.Clock()

@@ -7,6 +7,7 @@ class SerVivo:
     energia_padrao = 300  # quantidade arbitrária para usar em alguns momentos, o suficiente para o ser viver por um bom tempo
     energia_reproducao = 500  # quantidade de energia necessária para o ser se reproduzir
     custo_energetico = 7  # custo energético por turno para se manter vivo
+    energia_fome = 230 # energia abaixo da qual o ser come
     direcao = 'E' #última direção na qual se moveu
 
     def __init__(self, x, y):
@@ -16,7 +17,7 @@ class SerVivo:
 
     def gastarEnergia(self) -> StatusEnergia:
         if self.energia > self.energia_reproducao: #so reproduzir se tiver energia o suficiente
-            self.energia = self.energia_padrao
+            self.energia -= self.energia_padrao
             return StatusEnergia(EnergiaStatus.REPRODUZINDO)
         elif self.energia > 0: #gastar energia para se manter vivo
             self.energia -= type(self).custo_energetico #custo energético por turno para se manter vivo
@@ -46,7 +47,7 @@ class SerVivo:
                     tx -= self.escala
 
             #verifica a borda do mundo
-            if not (self.escala <= tx <= self.largura - self.escala and self.escala <= ty <= self.altura - self.escala):
+            if not (0 <= tx <= self.largura and 0 <= ty <= self.altura):
                 continue  #se bateu na borda, repete o loop
 
             #verificar colisão com plantas e animais

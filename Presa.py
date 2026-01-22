@@ -1,8 +1,8 @@
 from Animal import Animal
 
-class Mosca(Animal):
+class Presa(Animal):
     def predar(self, plantas, animais):
-        if self.energia < 230: #verificar se está com fome
+        if self.energia < self.energia_fome: #verificar se está com fome
             for planta in list(plantas):
                 if (abs(self.x - planta.x) <=self.escala) and (abs(self.y - planta.y) <=self.escala): #verificar se tem planta perto
                     plantas.remove(planta) #mata a planta
