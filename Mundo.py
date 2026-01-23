@@ -1,22 +1,18 @@
-import random
 import pygame
+import traceback
 from Energia import EnergiaStatus
-from Graficos import setMosca
+from Graficos import setPixel
 from SerVivo import SerVivo
 from Planta import Planta
 from Animal import Animal
-from Presa import Presa
-from Predador import Predador
+from Transformacoes import janela_viewport, aplica_transformacao
 
 class Mundo:
-    #seed bom p debug
-    def __init__(self, largura=1000, altura=800, escala=20, seed=None):
+    def __init__(self, largura=1000, altura=800, escala=20):
         self.largura = largura
         self.altura = altura
         self.escala = escala
-        if seed is not None:
-            random.seed(seed)
-        # Sincroniza parâmetros de mundo com SerVivo para manter compatibilidade
+
         SerVivo.largura, SerVivo.altura = largura, altura
         SerVivo.escala = escala
 
@@ -24,7 +20,7 @@ class Mundo:
         self.animais: list[Animal] = []
         self.tela: pygame.Surface | None = None
 
-    # --- Setup/Render ---
+    # Render
     def configurar_tela(self, titulo="EcoSim"):
         pygame.init()
         self.tela = pygame.display.set_mode((self.largura, self.altura))
@@ -34,15 +30,54 @@ class Mundo:
         if self.tela is None:
             return
         self.tela.fill((255, 255, 255))
-        # plantas em verde
         for p in self.plantas:
-            setMosca(self.tela, p.x, p.y, (0, 230, 0))
-        # animais em preto
+            p.desenhar(self.tela)
         for a in self.animais:
-            if type(a) is Presa:
-                setMosca(self.tela, a.x, a.y, (0, 0, 0))
-            else:
-                setMosca(self.tela, a.x, a.y, (200, 0, 0))
+            a.desenhar(self.tela)
+
+        # viewport
+        try:
+            L, A = self.tela.get_size()
+            margem = 10
+            vm_w, vm_h = int(0.30 * L), int(0.25 * A)
+            Vxmin, Vymin = margem, margem
+            Vxmax, Vymax = Vxmin + vm_w, Vymin + vm_h
+            viewport = (Vxmin, Vymin, Vxmax, Vymax)
+
+
+            janela = (0, 0, self.largura, self.altura)
+            M = janela_viewport(janela, viewport)
+
+            # Fundo da viewport para impedir que a cena principal apareça por baixo
+            rect = pygame.Rect(Vxmin, Vymin, vm_w, vm_h)
+            pygame.draw.rect(self.tela, (245, 245, 245), rect)
+
+            # Limita o desenho dos marcadores à área da viewport
+            old_clip = self.tela.get_clip()
+            try:
+                self.tela.set_clip(rect)
+
+                # Plantas (verde)
+                for p in self.plantas:
+                    (px, py), = aplica_transformacao(M, [(p.x, p.y)])
+                    for dx in (0, 1):
+                        for dy in (0, 1):
+                            setPixel(self.tela, px + dx, py + dy, (0, 160, 0))
+
+                # Animais (preto)
+                for a in self.animais:
+                    (px, py), = aplica_transformacao(M, [(a.x, a.y)])
+                    for dx in (0, 1):
+                        for dy in (0, 1):
+                            setPixel(self.tela, px + dx, py + dy, (0, 0, 0))
+            finally:
+                # Restaura o clip e desenha a borda por cima
+                self.tela.set_clip(old_clip)
+                pygame.draw.rect(self.tela, (0, 0, 0), rect, 1)
+        except Exception as e:
+            print(f"[Mundo.desenhar] Erro ao renderizar viewport: {e}")
+            traceback.print_exc()
+
         pygame.display.flip()
 
     def adicionar_planta(self, planta: Planta):
@@ -51,7 +86,7 @@ class Mundo:
     def adicionar_animal(self, animal: Animal):
         self.animais.append(animal)
 
-    def _spawn_filho(self, pai):
+    def spawn_filho(self, pai):
         filho = type(pai)(pai.x, pai.y)
         if hasattr(filho, 'fotossintese'):
             for i in range(2):
@@ -66,7 +101,7 @@ class Mundo:
         for p in list(self.plantas):
             res = p.gastarEnergia()
             if res.status is EnergiaStatus.REPRODUZINDO:
-                novas_plantas.append(self._spawn_filho(p))
+                novas_plantas.append(self.spawn_filho(p))
             elif res.status is EnergiaStatus.MORTO:
                 plantas_mortas.append(p)
             # fotossíntese depois do gasto energético
@@ -82,10 +117,11 @@ class Mundo:
         for a in list(self.animais):
             res = a.gastarEnergia()
             if res.status is EnergiaStatus.REPRODUZINDO:
-                novos_animais.append(self._spawn_filho(a))
+                novos_animais.append(self.spawn_filho(a))
             elif res.status is EnergiaStatus.MORTO:
                 animais_mortos.append(a)
 
+            a.atualizar()
             a.mover(self.plantas, self.animais)
             a.predar(self.plantas, self.animais)
 

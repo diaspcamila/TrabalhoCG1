@@ -14,6 +14,10 @@ class SerVivo:
         self.x = x
         self.y = y
         self.energia = self.energia_padrao
+        self.fase = 0
+
+    def atualizar(self):
+        self.fase += 0.5
 
     def gastarEnergia(self) -> StatusEnergia:
         if self.energia > self.energia_reproducao: #so reproduzir se tiver energia o suficiente
@@ -53,7 +57,8 @@ class SerVivo:
             #verificar colisão com plantas e animais
             colisao = False
             for ser in seres:
-                if abs(tx - ser.x) < self.escala and abs(ty - ser.y) < self.escala:
+                #if abs(tx - ser.x) < self.escala and abs(ty - ser.y) < self.escala:
+                if tx == ser.x and ty == ser.y: #tá durando mais?
                     colisao = True
                     break
             if colisao:

@@ -1,4 +1,5 @@
 from Animal import Animal
+from Graficos import setSapo
 
 class Predador(Animal):
     custo_energetico = 2# custo energético por turno para se manter vivo
@@ -14,3 +15,6 @@ class Predador(Animal):
                         animais.remove(animal)  # mata a presa
                         self.energia += 120  # ganha energia
                         break
+    
+    def desenhar(self, tela):
+        setSapo(tela, self.x, self.y)
