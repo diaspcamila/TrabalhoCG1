@@ -104,7 +104,7 @@ class Mundo:
             elif res.status is EnergiaStatus.MORTO:
                 plantas_mortas.append(p)
             # fotossíntese depois do gasto energético
-            p.fotossintese(self.plantas)
+            p.fotossintese(self.plantas, self.animais)
         for p in plantas_mortas:
             if p in self.plantas:
                 self.plantas.remove(p)
