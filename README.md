@@ -8,8 +8,7 @@ A simulação roda em *ticks* (passos discretos). Em cada tick:
 - animais se movem e podem predar;
 - plantas realizam “fotossíntese” para recuperar energia.
 
-> **Status do projeto**: documentação **rascunho** baseada no código atual do repositório. Algumas opções do menu ainda não alteram a simulação (ver seção “Limitações conhecidas”).
-
+> **Status do projeto**: documentação **rascunho** baseada no código atual do repositório.
 ---
 
 ## Sumário
