@@ -79,12 +79,12 @@ python .\Menu.py
 ```
 
 Botões:
-- **INICIO**: fecha o menu e chama `Inicializacao.main()`.
+- **INICIO**: fecha o menu e chama `Main.main()`.
 - **BIOMA**: alterna o texto *FLORESTA/MAR*.
 - **ANIMAIS**: alterna um número (5/10/20).
 - **SAIR**: fecha o programa.
 
-No `Inicializacao.py` são definidos:
+No `Main.py` são definidos:
 - tamanho da janela/mundo (`largura`, `altura`)
 - tamanho do passo no grid (`escala`)
 - população inicial (quantidade de plantas, presas, predadores)
@@ -94,10 +94,10 @@ No `Inicializacao.py` são definidos:
 ## Como funciona (alto nível)
 
 - **Entrada**:
-  - `Menu.py` → chama `Inicializacao.main()`
-  - ou rodar `Inicializacao.py` direto
+  - `Menu.py` → chama `Main.main()`
+  - ou rodar `Main.py` direto
 
-- **Loop principal** (`Inicializacao.main()`):
+- **Loop principal** (`Main.main()`):
   1. processa eventos (fechar janela);
   2. chama `mundo.tick()` para avançar a simulação;
   3. chama `mundo.desenhar()` para renderizar;

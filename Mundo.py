@@ -1,11 +1,13 @@
 import pygame
 import traceback
 from Energia import EnergiaStatus
-from Graficos import setPixel
+from Graficos import setPixel, setScanlineFill, setBordaRetangulo
 from SerVivo import SerVivo
 from Planta import Planta
 from Animal import Animal
-from Transformacoes import janela_viewport, aplica_transformacao
+from Transformacoes import aplica_transformacao
+from Clipping import desenhar_poligono, desenhar_poligono_recortado, janela_viewport, desenhar_linha_recortada
+
 
 class Mundo:
     def __init__(self, largura=1000, altura=800, escala=20):
@@ -40,48 +42,47 @@ class Mundo:
         for a in self.animais:
             a.desenhar(self.tela)
 
-        # viewport
+        # viewport a borda retangular
+        largura_tela, altura_tela = self.tela.get_size()
+        margem = 10
+        largura_vp = int(largura_tela*0.3)
+        altura_vp = int(altura_tela*0.25)
+
+        vxmin, vymin = margem, margem
+        vxmax, vymax = largura_vp + vxmin, altura_vp + vymin
+        viewport = (vxmin, vymin, vxmax, vymax)
+
+        # janela do mundo
+        janela = (0, 0, self.largura, self.altura)
+
+        # matriz que escala as coordenadas
+        m = janela_viewport(janela, viewport)
+        coords = [(vxmin, vymin), (vxmax, vymin), (vxmax, vymax), (vxmin,vymax)]
+        #desenhando viewport
+        w = vxmax - vxmin
+        h = vymax - vymin
+        setScanlineFill(self.tela, coords, (245, 245, 245))
+        setBordaRetangulo(self.tela, vxmin, vymin, w, h, (0, 0, 0))
+
         try:
-            L, A = self.tela.get_size()
-            margem = 10
-            vm_w, vm_h = int(0.30 * L), int(0.25 * A)
-            Vxmin, Vymin = margem, margem
-            Vxmax, Vymax = Vxmin + vm_w, Vymin + vm_h
-            viewport = (Vxmin, Vymin, Vxmax, Vymax)
+            for p in self.plantas:
+                cor = (0, 255, 0)
+                x, y = aplica_transformacao(m, [(p.x, p.y)])[0]
+                if vxmin <= int(x) <= vxmax and vymin <= int(y) <= vymax:
+                    setPixel(self.tela, int(x), int(y), cor)
 
+            for a in self.animais:
+                if getattr(a, "predador", True):
+                    cor = (255, 0, 0)
+                else:
+                    cor = (0, 0, 255)
+                x, y = aplica_transformacao(m, [(a.x, a.y)])[0]
+                if vxmin <= int(x) <= vxmax and vymin <= int(y) <= vymax:
+                    setPixel(self.tela, int(x), int(y), cor)
 
-            janela = (0, 0, self.largura, self.altura)
-            M = janela_viewport(janela, viewport)
-
-            # Fundo da viewport para impedir que a cena principal apareça por baixo
-            rect = pygame.Rect(Vxmin, Vymin, vm_w, vm_h)
-            pygame.draw.rect(self.tela, (245, 245, 245), rect)
-
-            # Limita o desenho dos marcadores à área da viewport
-            old_clip = self.tela.get_clip()
-            try:
-                self.tela.set_clip(rect)
-
-                # Plantas (verde)
-                for p in self.plantas:
-                    (px, py), = aplica_transformacao(M, [(p.x, p.y)])
-                    for dx in (0, 1):
-                        for dy in (0, 1):
-                            setPixel(self.tela, px + dx, py + dy, (0, 160, 0))
-
-                # Animais (preto)
-                for a in self.animais:
-                    (px, py), = aplica_transformacao(M, [(a.x, a.y)])
-                    for dx in (0, 1):
-                        for dy in (0, 1):
-                            setPixel(self.tela, px + dx, py + dy, (0, 0, 0))
-            finally:
-                # Restaura o clip e desenha a borda por cima
-                self.tela.set_clip(old_clip)
-                pygame.draw.rect(self.tela, (0, 0, 0), rect, 1)
         except Exception as e:
-            print(f"[Mundo.desenhar] Erro ao renderizar viewport: {e}")
             traceback.print_exc()
+
         pygame.display.flip()
 
     def adicionar_planta(self, planta: Planta):

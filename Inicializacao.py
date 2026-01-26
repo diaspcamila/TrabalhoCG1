@@ -28,7 +28,6 @@ def main(qtd_entidades):
     mundo.textura_fundo = textura_fundo
     print("textura atribuída ao mundo")
 
-
     for _ in range((qtd_entidades//7)*4):
         x = random.randint(1, max_cx) * escala
         y = random.randint(1, max_cy) * escala

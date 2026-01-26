@@ -41,20 +41,6 @@ def multiplicar_matrizes(A, B):
                 resultado[i][j] += A[i][k] * B[k][j]
     return resultado
 
-#janela p  viewport
-def janela_viewport(janela, viewport):
-    Wxmin, Wymin, Wxmax, Wymax = janela
-    Vxmin, Vymin, Vxmax, Vymax = viewport
-
-    sx = (Vxmax - Vxmin) / (Wxmax - Wxmin)
-    sy = (Vymax - Vymin) / (Wymax - Wymin)  # Y para baixo (sem inversão)
-
-    m = identidade()
-    m = multiplicar_matrizes(translacao(-Wxmin, -Wymin), m)
-    m = multiplicar_matrizes(escala(sx, sy), m)
-    m = multiplicar_matrizes(translacao(Vxmin, Vymin), m)
-    return m
-
 def aplica_transformacao(m, pontos):
     novos = []
     for x, y in pontos:

@@ -427,9 +427,9 @@ def setSapo(tela, x, y, fase, lingua):
     if lingua > 0:
         setBresenham(tela, x-1, frente_y, x, frente_y - 20, vermelho)
         setBresenham(tela, x, frente_y, x, frente_y - 20, vermelho)
-        setBresenham(tela, x+1, frente_y, x, frente_y - 20, vermelho)
+        setBresenham(tela, x + 1, frente_y, x, frente_y - 20, vermelho)
 
-#textura
+# textura
 def fundo_grama(superficie, passo=3):
     w, h = superficie.get_width(), superficie.get_height()
     superficie.lock()
@@ -439,9 +439,9 @@ def fundo_grama(superficie, passo=3):
             g = random.randint(180, 200)
             r = random.randint(90, 120)
 
-            for dy in range(passo):
-                for dx in range(passo):
-                    setPixel(superficie, x+dx, y+dy, (r, g, r))
+        for dy in range(passo):
+            for dx in range(passo):
+                setPixel(superficie, x + dx, y + dy, (r, g, r))
 
     superficie.unlock()
 
@@ -451,8 +451,8 @@ def ruido_grama(superficie, qtd=15000):
 
     superficie.lock()
     for _ in range(qtd):
-        x = random.randint(0, w-1)
-        y = random.randint(0, h-1)
+        x = random.randint(0, w - 1)
+        y = random.randint(0, h - 1)
 
         g = random.randint(140, 180)
         r = random.randint(30, 50)
@@ -466,23 +466,23 @@ def fiapos_grama(superficie, qtd=4000):
 
     superficie.lock()
     for _ in range(qtd):
-        x = random.randint(0, w-1)
-        y = random.randint(0, h-1)
+        x = random.randint(0, w - 1)
+        y = random.randint(0, h - 1)
 
-        hastes = random.randint(2, 5)   # quantas folhas no tufo
+        hastes = random.randint(2, 5)  # quantas folhas no tufo
 
         for _ in range(hastes):
             tam = random.randint(5, 10)
             dx = random.choice([-1, 0, 1])
 
             cor = random.choice([
-                (40,130,40),
-                (90,220,90),
-                (60,160,60)
+                (40, 130, 40),
+                (90, 220, 90),
+                (60, 160, 60)
             ])
 
-            setBresenham(superficie, x, y, x+dx, y-tam, cor)
-    superficie.unlock()
+            setBresenham(superficie, x, y, x + dx, y - tam, cor)
+        superficie.unlock()
 
 def textura_floresta(superficie):
     fundo_grama(superficie)
