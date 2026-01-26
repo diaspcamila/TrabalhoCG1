@@ -5,6 +5,7 @@ from Graficos import setPixel, setScanlineFill, setBordaRetangulo
 from SerVivo import SerVivo
 from Planta import Planta
 from Animal import Animal
+from Predador import Predador
 from Transformacoes import aplica_transformacao
 from Clipping import desenhar_poligono, desenhar_poligono_recortado, janela_viewport, desenhar_linha_recortada
 
@@ -61,8 +62,8 @@ class Mundo:
         #desenhando viewport
         w = vxmax - vxmin
         h = vymax - vymin
-        setScanlineFill(self.tela, coords, (245, 245, 245))
-        setBordaRetangulo(self.tela, vxmin, vymin, w, h, (0, 0, 0))
+        setScanlineFill(self.tela, coords, (0, 0, 0))
+        setBordaRetangulo(self.tela, vxmin, vymin, w, h, (255, 255, 255))
 
         try:
             for p in self.plantas:
@@ -72,10 +73,10 @@ class Mundo:
                     setPixel(self.tela, int(x), int(y), cor)
 
             for a in self.animais:
-                if getattr(a, "predador", True):
-                    cor = (255, 0, 0)
+                if isinstance(a, Predador):
+                    cor = (0, 150, 250)
                 else:
-                    cor = (0, 0, 255)
+                    cor = (205, 150, 150)
                 x, y = aplica_transformacao(m, [(a.x, a.y)])[0]
                 if vxmin <= int(x) <= vxmax and vymin <= int(y) <= vymax:
                     setPixel(self.tela, int(x), int(y), cor)

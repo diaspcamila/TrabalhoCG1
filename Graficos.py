@@ -210,6 +210,66 @@ def setScanlineFill(superficie, pontos, cor_preenchimento):
                 for x in range(x_inicio, x_fim + 1):
                     setPixel(superficie, x, y, cor_preenchimento)
 
+
+def interpola_cor(c1, c2, t): #função auxiliar
+    r = int(c1[0] + (c2[0] - c1[0]) * t)
+    g = int(c1[1] + (c2[1] - c1[1]) * t)
+    b = int(c1[2] + (c2[2] - c1[2]) * t)
+
+    r = max(0, min(r, 255))
+    g = max(0, min(g, 255))
+    b = max(0, min(b, 255))
+
+    return (r, g, b)
+
+def scanline_fill_gradiente(superficie, pontos, cores):
+    ys = [p[1] for p in pontos]
+    y_min = int(min(ys))
+    y_max = int(max(ys))
+
+    n = len(pontos)
+
+    for y in range(y_min, y_max):
+        intersecoes = []
+
+        for i in range(n):
+            x0, y0 = pontos[i]
+            x1, y1 = pontos[(i + 1) % n]
+
+            c0 = cores[i]
+            c1 = cores[(i + 1) % n]
+
+            if y0 == y1:
+                continue
+
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+                c0, c1 = c1, c0
+
+            if y < y0 or y >= y1:
+                continue
+
+            t = (y - y0) / (y1 - y0)
+            x = x0 + t * (x1 - x0)
+            cor_y = interpola_cor(c0, c1, t)
+
+            intersecoes.append((x, cor_y))
+
+        intersecoes.sort(key=lambda i: i[0])
+
+        for i in range(0, len(intersecoes), 2):
+            if i + 1 < len(intersecoes):
+                x_ini, cor_ini = intersecoes[i]
+                x_fim, cor_fim = intersecoes[i + 1]
+
+                if x_fim == x_ini:
+                    continue
+
+                for x in range(int(x_ini), int(x_fim) + 1):
+                    t = (x - x_ini) / (x_fim - x_ini)
+                    cor = interpola_cor(cor_ini, cor_fim, t)
+                    setPixel(superficie, x, y, cor)
+
 #transformações geométricas
 def draw_ellipse_pivot(tela, px, py, cx, cy, rx, ry, ang, cor):
     passos = 80
@@ -250,6 +310,7 @@ def desenhar_asa(tela, x, y, lado, ang, cor, s):
 
 #animais e plantas
 def setPlanta(tela, x, y):
+    verde_mais_escuro = (0, 60, 0)
     verde_escuro = (0, 140, 0)
     verde = (0, 180, 0)
 
@@ -261,6 +322,13 @@ def setPlanta(tela, x, y):
     # caule
     setBresenham(tela, x + sx(-2), y + sy(-15), x + sx(1),  y + sy(-25), verde_escuro)
     setBresenham(tela, x + sx(-1), y + sy(0),   x + sx(-3), y + sy(-15), verde_escuro)
+
+    cores_folha = [
+        verde,
+        verde,
+        verde_mais_escuro,
+        verde_mais_escuro
+    ]
 
     # ---------- folha esquerda ----------
     folha_esq = [
@@ -275,7 +343,7 @@ def setPlanta(tela, x, y):
         x1, y1 = folha_esq[(i+1) % 4]
         setBresenham(tela, x0, y0, x1, y1, verde_escuro)
 
-    setScanlineFill(tela, folha_esq, verde)
+    scanline_fill_gradiente(tela, folha_esq, cores_folha)
 
     # ---------- folha direita ----------
     folha_dir = [
@@ -290,7 +358,7 @@ def setPlanta(tela, x, y):
         x1, y1 = folha_dir[(i+1) % 4]
         setBresenham(tela, x0, y0, x1, y1, verde_escuro)
 
-    setScanlineFill(tela, folha_dir, verde)
+    scanline_fill_gradiente(tela, folha_dir, cores_folha)
 
 
 def setMosca(tela, x, y, fase, s=0.6):
@@ -312,6 +380,7 @@ def setMosca(tela, x, y, fase, s=0.6):
 
 def setSapo(tela, x, y, fase, lingua):
     azul = (0,200,230)
+    azul_esc = (30, 50, 100)
     borda = (0,20,80)
     branco = (255,255,255)
     vermelho = (255, 0, 0)
@@ -324,17 +393,31 @@ def setSapo(tela, x, y, fase, lingua):
         x1, y1 = corpo[(i+1) % len(corpo)]
         setBresenham(tela, x0, y0, x1, y1, borda)
 
-    setScanlineFill(tela, corpo, azul)
+    cores_corpo = [
+        azul,
+        azul,
+        azul_esc,
+        azul_esc
+    ]
+    scanline_fill_gradiente(tela, corpo, cores_corpo)
 
     # ---------- CABEÇA ----------
     cabeca = hexagono_largo(x, y-30, w=50, h=16)
+    cores_cabeca = [
+        azul,
+        azul,
+        azul,
+        azul,
+        azul_esc,
+        azul_esc
+    ]
 
     for i in range(len(cabeca)):
         x0, y0 = cabeca[i]
         x1, y1 = cabeca[(i+1) % len(cabeca)]
         setBresenham(tela, x0, y0, x1, y1, borda)
 
-    setScanlineFill(tela, cabeca, azul)
+    scanline_fill_gradiente(tela, cabeca, cores_cabeca)
 
     olho_y = y - 47
     dx = 12
@@ -368,7 +451,12 @@ def setSapo(tela, x, y, fase, lingua):
     # ---------- PATAS ----------
     chao = y + 7
     altura = 12
-    sep = 14  
+    sep = 14
+    cores_patas = [
+        azul_esc,
+        azul_esc,
+        azul
+    ]
 
     # -------- pata esquerda --------
     pata_esq = [
@@ -382,7 +470,7 @@ def setSapo(tela, x, y, fase, lingua):
         x1, y1 = pata_esq[(i+1) % 3]
         setBresenham(tela, x0, y0, x1, y1, borda)
 
-    setScanlineFill(tela, pata_esq, azul)
+    scanline_fill_gradiente(tela, pata_esq, cores_patas)
 
     # -------- pata direita --------
     pata_dir = [
@@ -396,7 +484,7 @@ def setSapo(tela, x, y, fase, lingua):
         x1, y1 = pata_dir[(i+1) % 3]
         setBresenham(tela, x0, y0, x1, y1, borda)
 
-    setScanlineFill(tela, pata_dir, azul)
+    scanline_fill_gradiente(tela, pata_dir, cores_patas)
 
     # ---------- BOCA (LINHAS) ----------
     frente_y = y - 22
