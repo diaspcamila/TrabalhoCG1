@@ -79,11 +79,6 @@ def janela_viewport(janela, viewport):
     m = multiplicar_matrizes(translacao(Vxmin, Vymin), m)
     return m
 
-
-def aplicar_matriz_em_ponto(m, x, y):
-    return aplica_transformacao(m, [(x, y)])[0]
-
-
 #sutherland hodgman
 def dentroClip(ponto, aresta, janela):
     x, y = ponto
@@ -172,8 +167,8 @@ def desenhar_linha_recortada(superficie, x0, y0, x1, y1, janela, viewport, cor):
         return
 
     m = janela_viewport(janela, viewport)
-    vx0, vy0 = aplicar_matriz_em_ponto(m, cx0, cy0)
-    vx1, vy1 = aplicar_matriz_em_ponto(m, cx1, cy1)
+    vx0, vy0 = aplica_transformacao(m, (cx0, cy0))
+    vx1, vy1 = aplica_transformacao(m, (cx1, cy1))
     setBresenham(superficie, int(vx0), int(vy0), int(vx1), int(vy1), cor)
 
 

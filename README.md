@@ -2,13 +2,12 @@
 
 Simulação 2D de um ecossistema (plantas, presas e predadores) feita em **Python + Pygame**.
 
-A simulação roda em *ticks* (passos discretos). Em cada tick:
+A simulação roda em *ticks*. Em cada tick:
 - seres vivos gastam energia;
 - podem morrer ou se reproduzir;
 - animais se movem e podem predar;
 - plantas realizam “fotossíntese” para recuperar energia.
 
-> **Status do projeto**: documentação **rascunho** baseada no código atual do repositório.
 ---
 
 ## Sumário
@@ -31,8 +30,10 @@ A simulação roda em *ticks* (passos discretos). Em cada tick:
 ## Demonstração / o que você vai ver
 
 Ao executar, abre uma janela do Pygame com:
-- **mundo principal** (onde as entidades são desenhadas);
-- uma **mini-viewport** no canto superior esquerdo (um “mapa” mostrando marcadores de plantas e animais).
+
+- **Menu**, onde são escolhidos os biomas e a quantidade de entidades que existirão quando a simulação começar;
+- após clicar no botão "Inicio", o programa abre um **mundo principal**, onde as entidades são desenhadas;
+- e uma **mini-viewport** no canto superior esquerdo (um “mapa” mostrando marcadores de plantas e animais).
 
 Comportamentos típicos:
 - plantas aumentam energia e se espalham, mas podem morrer se ficarem sem energia;
@@ -44,7 +45,7 @@ Comportamentos típicos:
 
 ## Requisitos
 
-- **Python 3.10+** (recomendado; o projeto usa `match/case` em `SerVivo.py`)
+- **Python 3.10+** (recomendado)
 - **pygame**
 
 ---
@@ -53,9 +54,9 @@ Comportamentos típicos:
 
 1) Baixe/clone e entre na pasta do projeto.
 
-2) (Opcional, recomendado) crie um ambiente virtual.
+2) (Recomendado) crie um ambiente virtual.
 
-3) Instale as dependências (no mínimo `pygame`).
+3) Instale as dependências.
 
 Exemplo (PowerShell):
 
@@ -79,12 +80,12 @@ python .\Menu.py
 ```
 
 Botões:
-- **INICIO**: fecha o menu e chama `Main.main()`.
+- **INICIO**: fecha o menu e chama `Inicializacao.main()`.
 - **BIOMA**: alterna o texto *FLORESTA/MAR*.
-- **ANIMAIS**: alterna um número (5/10/20).
+- **ANIMAIS**: alterna um número (21/35/49).
 - **SAIR**: fecha o programa.
 
-No `Main.py` são definidos:
+No `Inicializacao.py` são definidos:
 - tamanho da janela/mundo (`largura`, `altura`)
 - tamanho do passo no grid (`escala`)
 - população inicial (quantidade de plantas, presas, predadores)
@@ -94,10 +95,10 @@ No `Main.py` são definidos:
 ## Como funciona (alto nível)
 
 - **Entrada**:
-  - `Menu.py` → chama `Main.main()`
-  - ou rodar `Main.py` direto
+  - `Menu.py` → chama `Inicializacao.main()`
+  - ou rodar `Inicializacao.py` direto
 
-- **Loop principal** (`Main.main()`):
+- **Loop principal** (`Inicializacao.main()`):
   1. processa eventos (fechar janela);
   2. chama `mundo.tick()` para avançar a simulação;
   3. chama `mundo.desenhar()` para renderizar;
@@ -207,11 +208,11 @@ Em `Planta.fotossintese(plantas, animais)`:
   - se `energia < energia_fome`, procura um animal de outro tipo adjacente (até 1 passo) e come:
     - remove a presa da lista
     - `energia += 120`
-    - ativa uma animação de “língua” (`lingua = 4`).
+    - ativa uma animação de “língua” no sapo (`lingua = 4`).
 
 ---
 
-### Mundo / grid (em `Main.py`)
+### Mundo / grid (em `Inicializacao.py`)
 
 - `largura, altura, escala = 1000, 800, 20`
 - População inicial:

@@ -7,14 +7,14 @@ from Planta import Planta
 from Animal import Animal
 from Predador import Predador
 from Transformacoes import aplica_transformacao
-from Clipping import desenhar_poligono, desenhar_poligono_recortado, janela_viewport, desenhar_linha_recortada
-
+from Clipping import janela_viewport
 
 class Mundo:
-    def __init__(self, largura=1000, altura=800, escala=20):
+    def __init__(self, bioma, largura=1000, altura=800, escala=20):
         self.largura = largura
         self.altura = altura
         self.escala = escala
+        self.bioma = bioma
 
         SerVivo.largura, SerVivo.altura = largura, altura
         SerVivo.escala = escala
@@ -39,9 +39,9 @@ class Mundo:
             self.tela.fill((255, 255, 255))
 
         for p in self.plantas:
-            p.desenhar(self.tela)
+            p.desenhar(self.tela, self.bioma)
         for a in self.animais:
-            a.desenhar(self.tela)
+            a.desenhar(self.tela, self.bioma)
 
         # viewport a borda retangular
         largura_tela, altura_tela = self.tela.get_size()
@@ -81,7 +81,7 @@ class Mundo:
                 if vxmin <= int(x) <= vxmax and vymin <= int(y) <= vymax:
                     setPixel(self.tela, int(x), int(y), cor)
 
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
         pygame.display.flip()

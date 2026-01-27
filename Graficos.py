@@ -220,7 +220,7 @@ def interpola_cor(c1, c2, t): #função auxiliar
     g = max(0, min(g, 255))
     b = max(0, min(b, 255))
 
-    return (r, g, b)
+    return r, g, b
 
 def scanline_fill_gradiente(superficie, pontos, cores):
     ys = [p[1] for p in pontos]
@@ -382,7 +382,6 @@ def setSapo(tela, x, y, fase, lingua):
     azul = (0,200,230)
     azul_esc = (30, 50, 100)
     borda = (0,20,80)
-    branco = (255,255,255)
     vermelho = (255, 0, 0)
 
     # ---------- CORPO ----------
@@ -517,7 +516,17 @@ def setSapo(tela, x, y, fase, lingua):
         setBresenham(tela, x, frente_y, x, frente_y - 20, vermelho)
         setBresenham(tela, x + 1, frente_y, x, frente_y - 20, vermelho)
 
-# textura
+#bioma mar
+def setPeixe(tela, x, y):
+    pass
+
+def setTubarao(tela, x, y, fase):
+    pass
+
+def setAlga(tela, x, y,fase):
+    pass
+
+# textura floresta
 def fundo_grama(superficie, passo=3):
     w, h = superficie.get_width(), superficie.get_height()
     superficie.lock()
@@ -576,3 +585,8 @@ def textura_floresta(superficie):
     fundo_grama(superficie)
     ruido_grama(superficie, 8000)
     fiapos_grama(superficie, 3500)
+
+#textura mar
+def textura_mar(superficie):
+    pass
+

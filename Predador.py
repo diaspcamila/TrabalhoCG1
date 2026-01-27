@@ -1,5 +1,5 @@
 from Animal import Animal
-from Graficos import setSapo
+from Graficos import setSapo, setTubarao
 
 class Predador(Animal):
     custo_energetico = 2# custo energético por turno para se manter vivo
@@ -19,8 +19,11 @@ class Predador(Animal):
                         self.energia += 120  # ganha energia
                         break
     
-    def desenhar(self, tela):
-        setSapo(tela, self.x, self.y, self.fase, self.lingua)
+    def desenhar(self, tela, bioma):
+        if bioma == 0:
+            setSapo(tela, self.x, self.y, self.fase, self.lingua)
+        else:
+            setTubarao(tela, self.x, self.y, self.fase)
 
     def atualizar(self):
         self.fase += 0.5

@@ -1,18 +1,16 @@
 import sys
-import random
-import pygame
 from Mundo import Mundo
 from Planta import Planta
 from Presa import Presa
 from Predador import Predador
 from Graficos import *
 
-def main(qtd_entidades):
+def main(qtd_entidades, bioma):
     pygame.init()
 
     # Configurações do mundo
     largura, altura, escala = 1000, 800, 20
-    mundo = Mundo(largura=largura, altura=altura, escala=escala)
+    mundo = Mundo(largura=largura, altura=altura, escala=escala, bioma=bioma)
     mundo.configurar_tela("EcoSim")
 
     # População inicial | x,2x,4x
@@ -22,7 +20,11 @@ def main(qtd_entidades):
     textura_fundo = pygame.Surface((largura, altura))
     print("surface criada")
 
-    textura_floresta(textura_fundo)
+    if bioma == 0:
+        textura_floresta(textura_fundo)
+    else:
+        textura_mar(textura_fundo)
+
     print("textura gerada")
 
     mundo.textura_fundo = textura_fundo
@@ -50,8 +52,6 @@ def main(qtd_entidades):
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
-
-
 
         mundo.tick()
         mundo.desenhar()

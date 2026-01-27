@@ -1,5 +1,6 @@
 from SerVivo import *
-from Graficos import setPlanta
+from Graficos import setPlanta, setAlga
+
 
 class Planta(SerVivo):
     alcance_vizinhos = SerVivo.escala * 2
@@ -22,5 +23,8 @@ class Planta(SerVivo):
             else:
                 self.energia += 5
 
-    def desenhar(self, tela):
-        setPlanta(tela, self.x, self.y)
+    def desenhar(self, tela, bioma):
+        if bioma == 0:
+            setPlanta(tela, self.x, self.y)
+        else:
+            setAlga(tela, self.x, self.y)

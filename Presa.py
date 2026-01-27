@@ -1,5 +1,5 @@
 from Animal import Animal
-from Graficos import setMosca
+from Graficos import setMosca, setPeixe
 
 class Presa(Animal):
     def predar(self, plantas, animais):
@@ -10,5 +10,8 @@ class Presa(Animal):
                     self.energia += 300 #ganha energia
                     break
     
-    def desenhar(self, tela):
-        setMosca(tela, self.x, self.y, self.fase)
+    def desenhar(self, tela, bioma):
+        if bioma == 0:
+            setMosca(tela, self.x, self.y, self.fase)
+        else:
+            setPeixe(tela, self.x, self.y, self.fase)
