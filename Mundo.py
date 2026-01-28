@@ -115,6 +115,11 @@ class Mundo:
         else:
             self.tela.fill((255, 255, 255))
 
+        # viewport a borda retangular
+        largura_tela, altura_tela = self.tela.get_size()
+        margem = 10
+        largura_vp = int(largura_tela*0.3)
+        altura_vp = int(altura_tela*0.25)
 
         #entidades no mundo
         try:
@@ -122,18 +127,17 @@ class Mundo:
                 (sx, sy) = aplica_transformacao(mundo, [(p.x, p.y)])[0]
                 ox, oy = p.x, p.y
                 p.x, p.y = sx, sy
-                p.desenhar(self.tela, self.bioma)
+                p.desenhar(self.tela, self.bioma, viewport)
                 p.x, p.y = ox, oy
             for a in self.animais:
                 (sx, sy) = aplica_transformacao(mundo, [(a.x, a.y)])[0]
                 ox, oy = a.x, a.y
                 a.x, a.y = sx, sy
-                a.desenhar(self.tela, self.bioma)
+                a.desenhar(self.tela, self.bioma, viewport)
                 a.x, a.y = ox, oy
 
         except Exception:
             traceback.print_exc()
-
 
         # desenhando viewport
         vxmin, vymin, vxmax, vymax = viewport

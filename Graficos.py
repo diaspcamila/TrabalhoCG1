@@ -1,298 +1,62 @@
 import pygame
-import math
 import random
+from Formas import *
+from Clipping import desenhar_linha_recortada, desenhar_poligono_recortado, scanlineGrad_poligono_recortado
 
-#set_pixel
-def setPixel(superficie, x, y, cor):
-    if 0 <= x < superficie.get_width() and 0 <= y < superficie.get_height():
-        superficie.set_at((x, y), cor)
+#animais e plantas
+def setPlanta(tela, x, y, viewport):
+    w, h = tela.get_size() #proporções da tela, para clipping
+    tam_tela = (0, 0, w, h)
 
-#primitivas
-def setBresenham(superficie, x0, y0, x1, y1, cor):
-    steep = abs(y1 - y0) > abs(x1 - x0)
-    if steep:
-        x0, y0 = y0, x0
-        x1, y1 = y1, x1
+    verde_mais_escuro = (0, 60, 0)
+    verde_escuro = (0, 140, 0)
+    verde = (0, 180, 0)
 
-    if x0 > x1:
-        x0, x1 = x1, x0
-        y0, y1 = y1, y0
+    s = 1.3  # escala da planta
 
-    dx = x1 - x0
-    dy = abs(y1 - y0)
-    ystep = 1 if y0 < y1 else -1
+    def sx(dx): return int(dx * s)
+    def sy(dy): return int(dy * s)
 
-    d = 2 * dy - dx
-    y = y0
+    # caule
+    desenhar_linha_recortada(tela, x + sx(-2), y + sy(-15), x + sx(1),  y + sy(-25), tam_tela, viewport, verde_escuro)
+    desenhar_linha_recortada(tela, x + sx(-1), y + sy(0),   x + sx(-3), y + sy(-15), tam_tela, viewport, verde_escuro)
 
-    for x in range(x0, x1 + 1):
-        if steep:
-            setPixel(superficie, y, x, cor)
-        else:
-            setPixel(superficie, x, y, cor)
-
-        if d > 0:
-            y += ystep
-            d -= 2 * dx
-        d += 2 * dy
-
-def setCircle(tela, xc, yc, r, cor):
-    x = 0
-    y = r
-    d = 1 - r
-
-    while x <= y:
-        pontos = [
-            ( xc+x, yc+y), ( xc-x, yc+y),
-            ( xc+x, yc-y), ( xc-x, yc-y),
-            ( xc+y, yc+x), ( xc-y, yc+x),
-            ( xc+y, yc-x), ( xc-y, yc-x)
-        ]
-        for px, py in pontos:
-            setPixel(tela, px, py, cor)
-
-        if d < 0:
-            d += 2*x + 3
-        else:
-            d += 2*(x - y) + 5
-            y -= 1
-        x += 1
-
-def setEllipse(tela, xc, yc, rx, ry, cor):
-    x = 0
-    y = ry
-
-    rx2 = rx*rx
-    ry2 = ry*ry
-    d1 = ry2 - rx2*ry + 0.25*rx2
-
-    dx = 2*ry2*x
-    dy = 2*rx2*y
-
-    # Região 1
-    while dx < dy:
-        plot_ellipse_points(tela, xc, yc, x, y, cor)
-        if d1 < 0:
-            x += 1
-            dx += 2*ry2
-            d1 += dx + ry2
-        else:
-            x += 1
-            y -= 1
-            dx += 2*ry2
-            dy -= 2*rx2
-            d1 += dx - dy + ry2
-
-    # Região 2
-    d2 = (ry2*(x+0.5)**2) + (rx2*(y-1)**2) - rx2*ry2
-    while y >= 0:
-        plot_ellipse_points(tela, xc, yc, x, y, cor)
-        if d2 > 0:
-            y -= 1
-            dy -= 2*rx2
-            d2 += rx2 - dy
-        else:
-            y -= 1
-            x += 1
-            dx += 2*ry2
-            dy -= 2*rx2
-            d2 += dx - dy + rx2
-
-def plot_ellipse_points(tela, xc, yc, x, y, cor):
-    setPixel(tela, xc+x, yc+y, cor)
-    setPixel(tela, xc-x, yc+y, cor)
-    setPixel(tela, xc+x, yc-y, cor)
-    setPixel(tela, xc-x, yc-y, cor)
-
-def setBordaRetangulo(superficie, x, y, w, h, cor):
-    setBresenham(superficie, x, y, x+w, y, cor)
-    setBresenham(superficie, x+w, y, x+w, y+h, cor)
-    setBresenham(superficie, x+w, y+h, x, y+h, cor)
-    setBresenham(superficie, x, y+h, x, y, cor)
-
-def hexagono_largo(cx, cy, w, h):
-    return [
-        (cx - w//2, cy),
-        (cx - w//4, cy - h),
-        (cx + w//4, cy - h),
-        (cx + w//2, cy),
-        (cx + w//4, cy + h),
-        (cx - w//4, cy + h),
+    cores_folha = [
+        verde,
+        verde,
+        verde_mais_escuro,
+        verde_mais_escuro
     ]
 
-def trapezio_pequeno(cx, cy, topo, base, h):
-    return [
-        (cx - topo//2, cy),
-        (cx + topo//2, cy),
-        (cx + base//2, cy + h),
-        (cx - base//2, cy + h),
+    # ---------- folha esquerda ----------
+    folha_esq = [
+        (x + sx(-10), y + sy(-20)),
+        (x + sx(-2),  y + sy(-15)),
+        (x + sx(-10), y + sy(-10)),
+        (x + sx(-18), y + sy(-15))
     ]
 
-def losango(cx, cy, w, h):
-    return [
-        (cx,     cy - h),  # cima
-        (cx + w, cy),      # direita
-        (cx,     cy + h),  # baixo
-        (cx - w, cy)       # esquerda
+    for i in range(4):
+        x0, y0 = folha_esq[i]
+        x1, y1 = folha_esq[(i+1) % 4]
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, verde_escuro)
+
+    scanlineGrad_poligono_recortado(tela, folha_esq, tam_tela, viewport, cores_folha)
+
+    # ---------- folha direita ----------
+    folha_dir = [
+        (x + sx(7),  y + sy(-25)),
+        (x + sx(15), y + sy(-20)),
+        (x + sx(7),  y + sy(-15)),
+        (x + sx(1),  y + sy(-20))
     ]
 
-def setPixelGrosso(tela, x, y, cor, tamanho=2):
-    for dx in range(-tamanho//2, tamanho//2 + 1):
-        for dy in range(-tamanho//2, tamanho//2 + 1):
-            setPixel(tela, x + dx, y + dy, cor)
+    for i in range(4):
+        x0, y0 = folha_dir[i]
+        x1, y1 = folha_dir[(i+1) % 4]
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, verde_escuro)
 
-#preenchimento
-def setFloodFill(superficie, x, y, cor_preenchimento, cor_borda):
-    largura = superficie.get_width()
-    altura = superficie.get_height()
-
-    pilha = [(x, y)]
-    contador = 0
-
-    while pilha:
-        px, py = pilha.pop()
-
-        if not (0 <= px < largura and 0 <= py < altura):
-            continue
-
-        cor_atual = superficie.get_at((px, py))[:3]
-
-        if cor_atual == cor_borda or cor_atual == cor_preenchimento:
-            continue
-
-        setPixel(superficie, px, py, cor_preenchimento)
-
-        pilha.append((px + 1, py))
-        pilha.append((px - 1, py))
-        pilha.append((px, py + 1))
-        pilha.append((px, py - 1))
-
-        contador += 1
-        if contador % 5000 == 0:
-            pygame.display.flip()
-
-def setScanlineFill(superficie, pontos, cor_preenchimento):
-    # Encontra Y mínimo e máximo4
-
-    ys = [p[1] for p in pontos]
-    y_min = min(ys)
-    y_max = max(ys)
-
-    n = len(pontos)
-
-    for y in range(y_min, y_max):
-        intersecoes_x = []
-
-        for i in range(n):
-            x0, y0 = pontos[i]
-            x1, y1 = pontos[(i + 1) % n]
-
-            # Ignora arestas horizontais
-            if y0 == y1:
-                continue
-
-            # Garante y0 < y1
-            if y0 > y1:
-                x0, y0, x1, y1 = x1, y1, x0, y0
-
-            # Regra Ymin ≤ y < Ymax
-            if y < y0 or y >= y1:
-                continue
-
-            # Calcula interseção
-            x = x0 + (y - y0) * (x1 - x0) / (y1 - y0)
-            intersecoes_x.append(x)
-
-        # Ordena interseções
-        intersecoes_x.sort()
-
-        # Preenche entre pares
-        for i in range(0, len(intersecoes_x), 2):
-            if i + 1 < len(intersecoes_x):
-                x_inicio = int(round(intersecoes_x[i]))
-                x_fim = int(round(intersecoes_x[i + 1]))
-
-                for x in range(x_inicio, x_fim + 1):
-                    setPixel(superficie, x, y, cor_preenchimento)
-
-
-def interpola_cor(c1, c2, t): #função auxiliar
-    r = int(c1[0] + (c2[0] - c1[0]) * t)
-    g = int(c1[1] + (c2[1] - c1[1]) * t)
-    b = int(c1[2] + (c2[2] - c1[2]) * t)
-
-    r = max(0, min(r, 255))
-    g = max(0, min(g, 255))
-    b = max(0, min(b, 255))
-
-    return r, g, b
-
-def scanline_fill_gradiente(superficie, pontos, cores):
-    ys = [p[1] for p in pontos]
-    y_min = int(min(ys))
-    y_max = int(max(ys))
-
-    n = len(pontos)
-
-    for y in range(y_min, y_max):
-        intersecoes = []
-
-        for i in range(n):
-            x0, y0 = pontos[i]
-            x1, y1 = pontos[(i + 1) % n]
-
-            c0 = cores[i]
-            c1 = cores[(i + 1) % n]
-
-            if y0 == y1:
-                continue
-
-            if y0 > y1:
-                x0, y0, x1, y1 = x1, y1, x0, y0
-                c0, c1 = c1, c0
-
-            if y < y0 or y >= y1:
-                continue
-
-            t = (y - y0) / (y1 - y0)
-            x = x0 + t * (x1 - x0)
-            cor_y = interpola_cor(c0, c1, t)
-
-            intersecoes.append((x, cor_y))
-
-        intersecoes.sort(key=lambda i: i[0])
-
-        for i in range(0, len(intersecoes), 2):
-            if i + 1 < len(intersecoes):
-                x_ini, cor_ini = intersecoes[i]
-                x_fim, cor_fim = intersecoes[i + 1]
-
-                if x_fim == x_ini:
-                    continue
-
-                for x in range(int(x_ini), int(x_fim) + 1):
-                    t = (x - x_ini) / (x_fim - x_ini)
-                    cor = interpola_cor(cor_ini, cor_fim, t)
-                    setPixel(superficie, x, y, cor)
-
-#transformações geométricas
-def draw_ellipse_pivot(tela, px, py, cx, cy, rx, ry, ang, cor):
-    passos = 80
-
-    cos_a = math.cos(ang)
-    sin_a = math.sin(ang)
-
-    for i in range(passos):
-        t = 2 * math.pi * i / passos
-
-        x = cx + rx * math.cos(t)
-        y = cy + ry * math.sin(t)
-
-        # rotação em torno do pivô (px, py)
-        xr = px + cos_a*(x - px) - sin_a*(y - py)
-        yr = py - sin_a*(x - px) + cos_a*(y - py)
-
-        setPixel(tela, int(xr), int(yr), cor)
+    scanlineGrad_poligono_recortado(tela, folha_dir, tam_tela, viewport, cores_folha)
 
 def desenhar_asa(tela, x, y, lado, ang, cor, s):
     # ponto onde a asa gruda na cabeça
@@ -313,60 +77,7 @@ def desenhar_asa(tela, x, y, lado, ang, cor, s):
         cor=cor
     )
 
-#animais e plantas
-def setPlanta(tela, x, y):
-    verde_mais_escuro = (0, 60, 0)
-    verde_escuro = (0, 140, 0)
-    verde = (0, 180, 0)
-
-    s = 1.3  # escala da planta
-
-    def sx(dx): return int(dx * s)
-    def sy(dy): return int(dy * s)
-
-    # caule
-    setBresenham(tela, x + sx(-2), y + sy(-15), x + sx(1),  y + sy(-25), verde_escuro)
-    setBresenham(tela, x + sx(-1), y + sy(0),   x + sx(-3), y + sy(-15), verde_escuro)
-
-    cores_folha = [
-        verde,
-        verde,
-        verde_mais_escuro,
-        verde_mais_escuro
-    ]
-
-    # ---------- folha esquerda ----------
-    folha_esq = [
-        (x + sx(-10), y + sy(-20)),
-        (x + sx(-2),  y + sy(-15)),
-        (x + sx(-10), y + sy(-10)),
-        (x + sx(-18), y + sy(-15))
-    ]
-
-    for i in range(4):
-        x0, y0 = folha_esq[i]
-        x1, y1 = folha_esq[(i+1) % 4]
-        setBresenham(tela, x0, y0, x1, y1, verde_escuro)
-
-    scanline_fill_gradiente(tela, folha_esq, cores_folha)
-
-    # ---------- folha direita ----------
-    folha_dir = [
-        (x + sx(7),  y + sy(-25)),
-        (x + sx(15), y + sy(-20)),
-        (x + sx(7),  y + sy(-15)),
-        (x + sx(1),  y + sy(-20))
-    ]
-
-    for i in range(4):
-        x0, y0 = folha_dir[i]
-        x1, y1 = folha_dir[(i+1) % 4]
-        setBresenham(tela, x0, y0, x1, y1, verde_escuro)
-
-    scanline_fill_gradiente(tela, folha_dir, cores_folha)
-
-
-def setMosca(tela, x, y, fase, s=0.6):
+def setMosca(tela, x, y, viewport, fase, s=0.6):
     preto = (0, 0, 0)
     cinza = (120, 120, 120)
     branco = (230, 230, 230)
@@ -383,7 +94,10 @@ def setMosca(tela, x, y, fase, s=0.6):
     setFloodFill(tela, x, y - int(6*s), cinza, preto)
 
 
-def setSapo(tela, x, y, fase, lingua):
+def setSapo(tela, x, y, fase, viewport, lingua):
+    w, h = tela.get_size()  # proporções da tela, para clipping
+    tam_tela = (0, 0, w, h)
+
     azul = (0,200,230)
     azul_esc = (30, 50, 100)
     borda = (0,20,80)
@@ -395,7 +109,7 @@ def setSapo(tela, x, y, fase, lingua):
     for i in range(len(corpo)):
         x0, y0 = corpo[i]
         x1, y1 = corpo[(i+1) % len(corpo)]
-        setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
     cores_corpo = [
         azul,
@@ -403,7 +117,7 @@ def setSapo(tela, x, y, fase, lingua):
         azul_esc,
         azul_esc
     ]
-    scanline_fill_gradiente(tela, corpo, cores_corpo)
+    scanlineGrad_poligono_recortado(tela, corpo, tam_tela, viewport, cores_corpo)
 
     # ---------- CABEÇA ----------
     cabeca = hexagono_largo(x, y-30, w=50, h=16)
@@ -419,9 +133,9 @@ def setSapo(tela, x, y, fase, lingua):
     for i in range(len(cabeca)):
         x0, y0 = cabeca[i]
         x1, y1 = cabeca[(i+1) % len(cabeca)]
-        setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, cabeca, cores_cabeca)
+    scanlineGrad_poligono_recortado(tela, cabeca, tam_tela, viewport, cores_cabeca)
 
     olho_y = y - 47
     dx = 12
@@ -440,7 +154,7 @@ def setSapo(tela, x, y, fase, lingua):
 
         if piscar:
             # olho fechado
-            setBresenham(tela, cx - 4, olho_y, cx + 4, olho_y, borda)
+            desenhar_linha_recortada(tela, cx - 4, olho_y, cx + 4, olho_y, tam_tela, viewport, borda)
         else:
 
             # branco do olho
@@ -472,9 +186,9 @@ def setSapo(tela, x, y, fase, lingua):
     for i in range(3):
         x0, y0 = pata_esq[i]
         x1, y1 = pata_esq[(i+1) % 3]
-        setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, pata_esq, cores_patas)
+    scanlineGrad_poligono_recortado(tela, pata_esq, tam_tela, viewport, cores_patas)
 
     # -------- pata direita --------
     pata_dir = [
@@ -486,17 +200,17 @@ def setSapo(tela, x, y, fase, lingua):
     for i in range(3):
         x0, y0 = pata_dir[i]
         x1, y1 = pata_dir[(i+1) % 3]
-        setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, pata_dir, cores_patas)
+    scanlineGrad_poligono_recortado(tela, pata_dir, tam_tela, viewport, cores_patas)
 
     # ---------- BOCA (LINHAS) ----------
     frente_y = y - 22
     dist = 10          
 
-    setBresenham(tela, x - dist, frente_y, x - dist - 10, frente_y - 8, borda)
-    setBresenham(tela, x + dist, frente_y, x + dist + 10, frente_y - 8, borda)
-    setBresenham(tela, x - dist, frente_y, x + dist, frente_y, borda)
+    desenhar_linha_recortada(tela, x - dist, frente_y, x - dist - 10, frente_y - 8, tam_tela, viewport, borda)
+    desenhar_linha_recortada(tela, x + dist, frente_y, x + dist + 10, frente_y - 8, tam_tela, viewport, borda)
+    desenhar_linha_recortada(tela, x - dist, frente_y, x + dist, frente_y, tam_tela, viewport, borda)
 
     # ---------- BRAÇO (LINHAS) ----------
     frente_y = y
@@ -505,24 +219,30 @@ def setSapo(tela, x, y, fase, lingua):
     # braço esquerdo
     x1, y1 = x - dist, frente_y
     x2, y2 = x - dist - 8, frente_y - 10
-    setBresenham(tela, x1, y1+4, x2+1, y2, borda)
+    desenhar_linha_recortada(tela, x1, y1+4, x2+1, y2, tam_tela, viewport, borda)
 
-    setBresenham(tela, x2, y2+12, x2 + 4, y2 + 6, borda)
+    desenhar_linha_recortada(tela, x2, y2+12, x2 + 4, y2 + 6, tam_tela, viewport, borda)
 
     # braço direito
     x3, y3 = x + dist, frente_y
     x4, y4 = x + dist + 8, frente_y - 10
-    setBresenham(tela, x3, y3+4, x4-1, y4, borda)
+    desenhar_linha_recortada(tela, x3, y3+4, x4-1, y4, tam_tela, viewport, borda)
 
-    setBresenham(tela, x4, y4+12, x4 - 4, y4 + 6, borda)
+    desenhar_linha_recortada(tela, x4, y4+12, x4 - 4, y4 + 6, tam_tela, viewport, borda)
 
     if lingua > 0:
-        setBresenham(tela, x-1, frente_y, x, frente_y - 20, vermelho)
-        setBresenham(tela, x, frente_y, x, frente_y - 20, vermelho)
-        setBresenham(tela, x + 1, frente_y, x, frente_y - 20, vermelho)
+        desenhar_linha_recortada(tela, x-1, frente_y, x, frente_y - 20, tam_tela, viewport, vermelho)
+        desenhar_linha_recortada(tela, x, frente_y, x, frente_y - 20, tam_tela, viewport, vermelho)
+        desenhar_linha_recortada(tela, x + 1, frente_y, x, frente_y - 20, tam_tela, viewport, vermelho)
 
 #bioma mar
-def setPeixe(tela, x, y, fase):
+def setPeixe(tela, x, y, viewport, fase):
+    w, h = tela.get_size()  # proporções da tela, para clipping
+    tam_tela = (0, 0, w, h)
+
+    azul = (80, 170, 220)
+    azul_esc = (30, 90, 160)
+    borda = (0, 40, 90)
     laranja = (255, 140, 100)
     laranja_esc = (250, 100, 80)
     borda = (255, 40, 90)
@@ -566,9 +286,10 @@ def setPeixe(tela, x, y, fase):
     for i in range(3):
         x0, y0 = cauda[i]
         x1, y1 = cauda[(i+1) % 3]
-        setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, cauda, [laranja_esc, laranja, laranja])
+    scanlineGrad_poligono_recortado(tela, cauda, tam_tela, viewport, [azul_esc, azul, azul])
+
 
     # ---------- OLHO (COM PISCAR) ----------
     olho_x = x + 6 + ond
@@ -576,7 +297,7 @@ def setPeixe(tela, x, y, fase):
 
     if piscar:
         # olho fechado (linha)
-        setBresenham(tela, olho_x - 3, olho_y, olho_x + 3, olho_y, (0,0,0))
+        desenhar_linha_recortada(tela, olho_x - 3, olho_y, olho_x + 3, olho_y, tam_tela, viewport, borda)
     else:
         # olho aberto
         setCircle(tela, olho_x, olho_y, 3, (0,0,0))
@@ -593,7 +314,10 @@ def setPeixe(tela, x, y, fase):
     setFloodFill(tela, olho_x, olho_y, (0,0,0), (0,0,0))
 
 
-def setTubarao(tela, x, y, fase, comendo=False):
+def setTubarao(tela, x, y, fase, viewport, comendo=False):
+    w, h = tela.get_size()  # proporções da tela, para clipping
+    tam_tela = (0, 0, w, h)
+
     cinza = (140, 140, 150)
     cinza_esc = (90, 90, 100)
     branco = (220, 220, 220)
@@ -626,8 +350,9 @@ def setTubarao(tela, x, y, fase, comendo=False):
         x0, y0 = barbatana[i]
         x1, y1 = barbatana[(i + 1) % 3]
         setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, barbatana, [cinza_esc]*3)
+    scanlineGrad_poligono_recortado(tela, barbatana, tam_tela, viewport, [cinza_esc]*3)
 
     # ---------- CAUDA (BALANÇANDO) ----------
     swing = int(8 * math.sin(fase))
@@ -642,8 +367,9 @@ def setTubarao(tela, x, y, fase, comendo=False):
         x0, y0 = cauda[i]
         x1, y1 = cauda[(i + 1) % 3]
         setBresenham(tela, x0, y0, x1, y1, borda)
+        desenhar_linha_recortada(tela, x0, y0, x1, y1, tam_tela, viewport, borda)
 
-    scanline_fill_gradiente(tela, cauda, [cinza_esc]*3)
+    scanlineGrad_poligono_recortado(tela, cauda, tam_tela, viewport, [cinza_esc]*3)
 
      # ---------- OLHO (COM PISCAR) ----------
     olho_x = x + 14
@@ -668,16 +394,20 @@ def setTubarao(tela, x, y, fase, comendo=False):
     if comendo:
         abertura = 6
         # boca aberta (V)
-        setBresenham(tela, boca_x1-6, boca_y, boca_x2-6, boca_y - abertura, borda)
-        setBresenham(tela, boca_x1-6, boca_y, boca_x2-6, boca_y + abertura, borda)
+        desenhar_linha_recortada(tela, boca_x1, boca_y, boca_x2, boca_y - abertura, tam_tela, viewport, borda)
+        desenhar_linha_recortada(tela, boca_x1, boca_y, boca_x2, boca_y + abertura, tam_tela, viewport, borda)
     else:
         # boca fechada
-        setBresenham(tela, boca_x1, boca_y, boca_x2, boca_y, borda)
+        desenhar_linha_recortada(tela, boca_x1, boca_y, boca_x2, boca_y, tam_tela, viewport, borda)
 
 
-def setAlga(tela, x, y, fase):
-    verde1 = (0, 160, 0)
-    verde2 = (0, 180, 0)
+def setAlga(tela, x, y, viewport, fase):
+    w, h = tela.get_size()  # proporções da tela, para clipping
+    tam_tela = (0, 0, w, h)
+
+    verde1 = (20, 120, 60)
+    verde2 = (40, 170, 90)
+    verde3 = (10, 90, 50)
 
     ramos = [
         {"dx": -8, "altura": 22, "amp": 2.0, "invert": False},  # esquerda
@@ -711,7 +441,7 @@ def setAlga(tela, x, y, fase):
 
             # desenha várias linhas lado a lado
             for e in range(-esp, esp + 1):
-                setBresenham(tela, px + e, py, nx + e, ny, cor)
+                desenhar_linha_recortada(tela, px + e, py, nx + e, ny, tam_tela, viewport, cor)
 
             px, py = nx, ny
 
