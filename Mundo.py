@@ -62,8 +62,12 @@ class Mundo:
         #desenhando viewport
         w = vxmax - vxmin
         h = vymax - vymin
-        setScanlineFill(self.tela, coords, (155, 255, 155))
-        setBordaRetangulo(self.tela, vxmin, vymin, w, h, (0, 140, 0))
+        if self.bioma == 0:
+            setScanlineFill(self.tela, coords, (155, 255, 155))
+            setBordaRetangulo(self.tela, vxmin, vymin, w, h, (0, 140, 0))
+        else:
+            setScanlineFill(self.tela, coords, (100, 200, 255))
+            setBordaRetangulo(self.tela, vxmin, vymin, w, h, (50, 60, 85))
 
         try:
             for p in self.plantas:
@@ -73,10 +77,14 @@ class Mundo:
                     setPixelGrosso(self.tela, int(x), int(y), cor)
 
             for a in self.animais:
-                if isinstance(a, Predador):
+                if isinstance(a, Predador) and self.bioma == 0:
                     cor = (0, 170, 200)
-                else:
+                elif isinstance(a, Predador) and self.bioma == 1:
+                    cor = (120, 120, 130)
+                elif not isinstance(a, Predador) and self.bioma == 0:
                     cor = (50, 50, 50)
+                else:
+                    cor = (250, 100, 80)
                 x, y = aplica_transformacao(m, [(a.x, a.y)])[0]
                 if vxmin <= int(x) <= vxmax and vymin <= int(y) <= vymax:
                     setPixelGrosso(self.tela, int(x), int(y), cor)
@@ -112,6 +120,7 @@ class Mundo:
                 plantas_mortas.append(p)
             # fotossíntese depois do gasto energético
             p.fotossintese(self.plantas, self.animais)
+            p.atualizar()
         for p in plantas_mortas:
             if p in self.plantas:
                 self.plantas.remove(p)

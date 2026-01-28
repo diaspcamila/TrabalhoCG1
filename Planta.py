@@ -23,6 +23,9 @@ class Planta(SerVivo):
             else:
                 self.energia += 5
 
+    def atualizar(self):
+        self.fase += 0.5
+
     def desenhar(self, tela, bioma):
         if bioma == 0:
             setPlanta(tela, self.x, self.y)
