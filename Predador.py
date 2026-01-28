@@ -25,7 +25,6 @@ class Predador(Animal):
         else:
             setTubarao(tela, self.x, self.y, self.fase, viewport, self.lingua > 0)
 
-
     def atualizar(self):
         self.fase += 0.5
         if self.lingua > 0:

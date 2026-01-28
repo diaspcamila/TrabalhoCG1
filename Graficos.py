@@ -243,6 +243,9 @@ def setPeixe(tela, x, y, viewport, fase):
     azul = (80, 170, 220)
     azul_esc = (30, 90, 160)
     borda = (0, 40, 90)
+    laranja = (255, 140, 100)
+    laranja_esc = (250, 100, 80)
+    borda = (255, 40, 90)
     branco = (255, 255, 255)
 
     piscar = (int(fase) % 25 == 0)
@@ -259,13 +262,13 @@ def setPeixe(tela, x, y, viewport, fase):
     setEllipse(tela, x + ond, y, rx, ry, borda)
 
     # preenchimento simples (flood)
-    setFloodFill(tela, x + ond, y, azul, borda)
+    setFloodFill(tela, x + ond, y, laranja, borda)
 
     # sombra inferior
     for dy in range(0, ry):
         for dx in range(-rx, rx):
             if (dx*dx)/(rx*rx) + (dy*dy)/(ry*ry) <= 1:
-                setPixel(tela, x + ond + dx, y + dy, azul_esc)
+                setPixel(tela, x + ond + dx, y + dy, laranja_esc)
 
     # ---------- CAUDA (TRIÂNGULO BALANÇANDO) ----------
     base_x = x - rx + ond
@@ -287,6 +290,7 @@ def setPeixe(tela, x, y, viewport, fase):
 
     scanlineGrad_poligono_recortado(tela, cauda, tam_tela, viewport, [azul_esc, azul, azul])
 
+
     # ---------- OLHO (COM PISCAR) ----------
     olho_x = x + 6 + ond
     olho_y = y - 2
@@ -296,18 +300,18 @@ def setPeixe(tela, x, y, viewport, fase):
         desenhar_linha_recortada(tela, olho_x - 3, olho_y, olho_x + 3, olho_y, tam_tela, viewport, borda)
     else:
         # olho aberto
-        setCircle(tela, olho_x, olho_y, 3, borda)
-        setFloodFill(tela, olho_x, olho_y, branco, borda)
+        setCircle(tela, olho_x, olho_y, 3, (0,0,0))
+        setFloodFill(tela, olho_x, olho_y, branco, (0,0,0))
 
         setCircle(tela, olho_x, olho_y, 1, (0,0,0))
-        setFloodFill(tela, olho_x, olho_y, (0,0,0), borda)
+        setFloodFill(tela, olho_x, olho_y, (0,0,0), (0,0,0))
 
 
-    setCircle(tela, olho_x, olho_y, 3, borda)
-    setFloodFill(tela, olho_x, olho_y, branco, borda)
+    setCircle(tela, olho_x, olho_y, 3, (0,0,0))
+    setFloodFill(tela, olho_x, olho_y, branco, (0,0,0))
 
     setCircle(tela, olho_x, olho_y, 1, (0,0,0))
-    setFloodFill(tela, olho_x, olho_y, (0,0,0), borda)
+    setFloodFill(tela, olho_x, olho_y, (0,0,0), (0,0,0))
 
 
 def setTubarao(tela, x, y, fase, viewport, comendo=False):
@@ -318,6 +322,8 @@ def setTubarao(tela, x, y, fase, viewport, comendo=False):
     cinza_esc = (90, 90, 100)
     branco = (220, 220, 220)
     borda = (30, 30, 40)
+
+    piscar = (int(fase) % 25 == 0)
 
     # ---------- CORPO (ELIPSE) ----------
     rx = 38
@@ -365,16 +371,24 @@ def setTubarao(tela, x, y, fase, viewport, comendo=False):
 
     scanlineGrad_poligono_recortado(tela, cauda, tam_tela, viewport, [cinza_esc]*3)
 
-    # ---------- OLHO ----------
+     # ---------- OLHO (COM PISCAR) ----------
     olho_x = x + 14
     olho_y = y - 4
 
-    setCircle(tela, olho_x, olho_y, 3, borda)
-    setFloodFill(tela, olho_x, olho_y, (0, 0, 0), borda)
+    if piscar:
+        # olho fechado (linha)
+        setBresenham(tela, olho_x - 3, olho_y, olho_x + 3, olho_y, borda)
+    else:
+        # olho aberto
+        setCircle(tela, olho_x, olho_y, 3, borda)
+        setFloodFill(tela, olho_x, olho_y, (255, 255, 255), borda)
+
+        setCircle(tela, olho_x, olho_y, 1, (0,0,0))
+        setFloodFill(tela, olho_x, olho_y, (0,0,0), borda)
 
     # ---------- BOCA (ABRE QUANDO COME) ----------
-    boca_x1 = x + 10
-    boca_x2 = x + 26
+    boca_x1 = x + 16
+    boca_x2 = x + 32
     boca_y = y + 6
 
     if comendo:
@@ -395,30 +409,42 @@ def setAlga(tela, x, y, viewport, fase):
     verde2 = (40, 170, 90)
     verde3 = (10, 90, 50)
 
-    altura = 35
-    hastes = 5
+    ramos = [
+        {"dx": -8, "altura": 22, "amp": 2.0, "invert": False},  # esquerda
+        {"dx":  0, "altura": 32, "amp": 3.5, "invert": True},   # meio (S invertido)
+        {"dx":  8, "altura": 22, "amp": 2.0, "invert": False},  # direita
+    ]
 
-    for i in range(hastes):
-        # espalha as hastes
-        bx = x + i * 4 - 8
+    for i, r in enumerate(ramos):
+        bx = x + r["dx"]
         by = y
-
-        # fase diferente pra cada haste
-        f = fase + i * 0.7
 
         px, py = bx, by
 
-        for t in range(1, altura):
-            # curva da alga (balanço)
-            dx = int(4 * math.sin(f * 0.8 + t * 0.2))
-            nx = bx + dx
+        for t in range(1, r["altura"]):
+            direcao = -1 if r["invert"] else 1
+
+            curva = math.sin((t * 0.25) + fase * 0.6) * r["amp"] * direcao
+            nx = int(bx + curva)
             ny = by - t
 
-            cor = random.choice([verde1, verde2, verde3])
+            cor = verde1 if (t % 2 == 0) else verde2
 
-            desenhar_linha_recortada(tela, px, py, nx, ny, tam_tela, viewport, cor)
+            # --------- ESPESSURA ---------
+            # mais grosso na base, fino no topo
+            if t < r["altura"] * 0.3:
+                esp = 2
+            elif t < r["altura"] * 0.6:
+                esp = 1
+            else:
+                esp = 0
+
+            # desenha várias linhas lado a lado
+            for e in range(-esp, esp + 1):
+                desenhar_linha_recortada(tela, px + e, py, nx + e, ny, tam_tela, viewport, cor)
 
             px, py = nx, ny
+
 
 # textura floresta
 def fundo_grama(superficie, passo=3):
@@ -542,4 +568,66 @@ def textura_mar(superficie):
     ruido_mar(superficie, 12000)
     ondas_mar(superficie, 2500)
 
+#textura titulo
+def scanline_texture(superficie, pontos, uvs, textura):
+    tex_w = textura.get_width()
+    tex_h = textura.get_height()
+    n = len(pontos)
 
+    ys = [p[1] for p in pontos]
+    y_min = int(min(ys))
+    y_max = int(max(ys))
+
+    for y in range(y_min, y_max):
+        inter = []
+
+        for i in range(n):
+            x0, y0 = pontos[i]
+            x1, y1 = pontos[(i + 1) % n]
+
+            u0, v0 = uvs[i]
+            u1, v1 = uvs[(i + 1) % n]
+
+            if y0 == y1:
+                continue
+
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+                u0, v0, u1, v1 = u1, v1, u0, v0
+
+            if y < y0 or y >= y1:
+                continue
+
+            t = (y - y0) / (y1 - y0)
+
+            x = x0 + t * (x1 - x0)
+            u = u0 + t * (u1 - u0)
+            v = v0 + t * (v1 - v0)
+
+            inter.append((x, u, v))
+
+        inter.sort(key=lambda i: i[0])
+
+        for i in range(0, len(inter), 2):
+            if i + 1 >= len(inter):
+                continue
+
+            x_start, u_start, v_start = inter[i]
+            x_end,   u_end,   v_end   = inter[i + 1]
+
+            if x_start == x_end:
+                continue
+
+            for x in range(int(x_start), int(x_end) + 1):
+                t = (x - x_start) / (x_end - x_start)
+
+                u = u_start + t * (u_end - u_start)
+                v = v_start + t * (v_end - v_start)
+
+                tx = int(u * (tex_w - 1))
+                ty = int(v * (tex_h - 1))
+
+                cor = textura.get_at((tx, ty))
+
+                if cor.a > 0:   # só desenha se NÃO for transparente
+                    setPixel(superficie, x, y, cor)

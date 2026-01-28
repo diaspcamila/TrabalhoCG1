@@ -1,5 +1,9 @@
 import math
 
+def dentro(mx, my, botao):
+    x, y, w, h = botao
+    return x <= mx <= x+w and y <= my <= y+h
+
 def identidade():
     return [
         [1, 0, 0],

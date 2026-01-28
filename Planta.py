@@ -22,6 +22,9 @@ class Planta(SerVivo):
                 self.energia += 20
             else:
                 self.energia += 5
+                
+    def atualizar(self):
+        self.fase += 0.5
 
     def desenhar(self, tela, bioma, viewport):
         if bioma == 0:

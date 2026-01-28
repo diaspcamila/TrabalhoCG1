@@ -2,6 +2,7 @@ import sys
 import Inicializacao
 from Graficos import *
 from Fonte import *
+from Transformacoes import dentro
 
 pygame.init()
 largura, altura = 900, 650
@@ -10,10 +11,10 @@ pygame.display.set_caption("EcoSim - Menu")
 
 FUNDO = (80, 120, 200)
 BORDA = (255, 255, 255)
-BOTAO = (21, 0, 76)
+BOTAO = (21, 46, 17)
 BOTAO_HOVER = (41, 14, 113)
 
-bioma = 0              # 0 floresta | 1 mar
+bioma = 0     # 0 floresta | 1 mar
 qtd_entidades = 21  # 21 35 49
 
 btn_start = (275, 220, 350, 70)
@@ -21,9 +22,27 @@ btn_bioma  = (275, 320, 350, 70)
 btn_qtd    = (275, 420, 350, 70)
 btn_sair   = (275, 520, 350, 70)
 
-def dentro(mx, my, botao):
-    x, y, w, h = botao
-    return x <= mx <= x+w and y <= my <= y+h
+textura_titulo = pygame.image.load("titulo.png").convert_alpha()
+
+larg_titulo = 600
+alt_titulo  = 150
+
+x0 = (largura - larg_titulo)//2
+y0 = 30
+
+titulo = [
+    (x0, y0),
+    (x0 + larg_titulo, y0),
+    (x0 + larg_titulo, y0 + alt_titulo),
+    (x0, y0 + alt_titulo)
+]
+
+uv_titulo = [
+    (0, 0),
+    (1, 0),
+    (1, 1),
+    (0, 1)
+]
 
 def desenhar_botao(botao, cor):
     x, y, w, h = botao
@@ -39,7 +58,7 @@ def desenhar_tela():
     desenhar_botao(btn_qtd, BOTAO)
     desenhar_botao(btn_sair, BOTAO)
 
-    draw_text(tela, 247, 80, "ECO SIM", (21,0,76), escala=9, setPixel=setPixel)
+    scanline_texture(tela, titulo, uv_titulo, textura_titulo)
     draw_text(tela, 390, 248, "INICIO", (255,255,255), escala=3, setPixel=setPixel)
     draw_text(tela, 300, 348, "BIOMA", (255,255,255), escala=3, setPixel=setPixel)
     draw_text(tela, 300, 448, "ANIMAIS", (255,255,255), escala=3, setPixel=setPixel)
@@ -92,7 +111,7 @@ while rodando:
     else:
         desenhar_botao(btn_sair, BOTAO)
 
-    draw_text(tela, 247, 80, "ECO SIM", (0,0,0), escala=9, setPixel=setPixel)
+    scanline_texture(tela, titulo, uv_titulo, textura_titulo)
     draw_text(tela, 390, 248, "INICIO", (255,255,255), escala=3, setPixel=setPixel)
     draw_text(tela, 300, 348, "BIOMA", (255,255,255), escala=3, setPixel=setPixel)
     draw_text(tela, 300, 448, "ANIMAIS", (255,255,255), escala=3, setPixel=setPixel)
