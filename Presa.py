@@ -10,8 +10,8 @@ class Presa(Animal):
                     self.energia += 300 #ganha energia
                     break
     
-    def desenhar(self, tela, bioma):
+    def desenhar(self, tela, bioma, viewport):
         if bioma == 0:
-            setMosca(tela, self.x, self.y, self.fase)
+            setMosca(tela, self.x, self.y, viewport, self.fase)
         else:
-            setPeixe(tela, self.x, self.y, self.fase)
+            setPeixe(tela, self.x, self.y, viewport, self.fase)

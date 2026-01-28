@@ -19,11 +19,11 @@ class Predador(Animal):
                         self.energia += 120  # ganha energia
                         break
     
-    def desenhar(self, tela, bioma):
+    def desenhar(self, tela, bioma, viewport):
         if bioma == 0:
-            setSapo(tela, self.x, self.y, self.fase, self.lingua)
+            setSapo(tela, self.x, self.y, self.fase, viewport, self.lingua)
         else:
-            setTubarao(tela, self.x, self.y, self.fase, self.lingua > 0)
+            setTubarao(tela, self.x, self.y, self.fase, viewport, self.lingua > 0)
 
 
     def atualizar(self):

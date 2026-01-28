@@ -38,11 +38,6 @@ class Mundo:
         else:
             self.tela.fill((255, 255, 255))
 
-        for p in self.plantas:
-            p.desenhar(self.tela, self.bioma)
-        for a in self.animais:
-            a.desenhar(self.tela, self.bioma)
-
         # viewport a borda retangular
         largura_tela, altura_tela = self.tela.get_size()
         margem = 10
@@ -52,6 +47,11 @@ class Mundo:
         vxmin, vymin = margem, margem
         vxmax, vymax = largura_vp + vxmin, altura_vp + vymin
         viewport = (vxmin, vymin, vxmax, vymax)
+
+        for p in self.plantas:
+            p.desenhar(self.tela, self.bioma, viewport)
+        for a in self.animais:
+            a.desenhar(self.tela, self.bioma, viewport)
 
         # janela do mundo
         janela = (0, 0, self.largura, self.altura)

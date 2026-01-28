@@ -23,8 +23,8 @@ class Planta(SerVivo):
             else:
                 self.energia += 5
 
-    def desenhar(self, tela, bioma):
+    def desenhar(self, tela, bioma, viewport):
         if bioma == 0:
-            setPlanta(tela, self.x, self.y)
+            setPlanta(tela, self.x, self.y, viewport)
         else:
-            setAlga(tela, self.x, self.y, self.fase)
+            setAlga(tela, self.x, self.y, viewport, self.fase)

@@ -1,12 +1,11 @@
-from Graficos import setBresenham
 from Transformacoes import multiplicar_matrizes, escala, identidade, translacao, aplica_transformacao
+from Formas import *
 
 INSIDE = 0
 LEFT = 1
 RIGHT = 2
 BOTTOM = 4
 TOP = 8
-
 
 def codigo_regiao(x, y, xmin, ymin, xmax, ymax):
     code = INSIDE
@@ -55,15 +54,6 @@ def cohen_sutherland(x0, y0, x1, y1, xmin, ymin, xmax, ymax):
         else:
             x1, y1 = x, y
             c1 = codigo_regiao(x1, y1, xmin, ymin, xmax, ymax)
-
-
-def desenhar_poligono(superficie, pontos, cor):
-    n = len(pontos)
-    for i in range(n):
-        x0, y0 = pontos[i]
-        x1, y1 = pontos[(i + 1) % n]
-        setBresenham(superficie, int(x0), int(y0), int(x1), int(y1), cor)
-
 
 #janela p  viewport
 def janela_viewport(janela, viewport):
@@ -159,6 +149,13 @@ def sutherlandhodgman(pontos, janela):
             s = e
     return saida
 
+#desenhos:
+def desenhar_poligono(superficie, pontos, cor):
+    n = len(pontos)
+    for i in range(n):
+        x0, y0 = pontos[i]
+        x1, y1 = pontos[(i + 1) % n]
+        setBresenham(superficie, int(x0), int(y0), int(x1), int(y1), cor)
 
 def desenhar_linha_recortada(superficie, x0, y0, x1, y1, janela, viewport, cor):
     xmin, ymin, xmax, ymax = janela
@@ -167,9 +164,12 @@ def desenhar_linha_recortada(superficie, x0, y0, x1, y1, janela, viewport, cor):
         return
 
     m = janela_viewport(janela, viewport)
-    vx0, vy0 = aplica_transformacao(m, (cx0, cy0))
-    vx1, vy1 = aplica_transformacao(m, (cx1, cy1))
-    setBresenham(superficie, int(vx0), int(vy0), int(vx1), int(vy1), cor)
+    listv0  = aplica_transformacao(m, [(cx0, cy0)])
+    vx0, vy0 = listv0[0]
+    listv1 = aplica_transformacao(m, [(cx1, cy1)])
+    vx1, vy1 = listv1[0]
+
+    setBresenham(superficie, vx0, vy0, vx1, vy1, cor)
 
 
 def desenhar_poligono_recortado(superficie, pontos, janela, viewport, cor):
@@ -180,3 +180,15 @@ def desenhar_poligono_recortado(superficie, pontos, janela, viewport, cor):
     m = janela_viewport(janela, viewport)
     pontos_vp = aplica_transformacao(m, pontos_clip)
     desenhar_poligono(superficie, pontos_vp, cor)
+
+def scanlineGrad_poligono_recortado(superficie, pontos, janela, viewport, cores):
+    pontos_clip = sutherlandhodgman(pontos, janela)
+    if len(pontos_clip) < 2:
+        return
+
+    m = janela_viewport(janela, viewport)
+    pontos_vp = aplica_transformacao(m, pontos_clip)
+    if len(pontos_vp) > len(cores):
+        for i in range(len(pontos_vp)-len(cores)):
+            cores.append()
+    scanline_fill_gradiente(superficie, pontos_vp, cores)
