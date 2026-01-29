@@ -180,9 +180,9 @@ def setSapo(tela, x, y, fase, viewport, lingua, zoom=1.0):
 
     # -------- pata esquerda --------
     pata_esq = [
-        (x - (14 + sep), chao),
-        (x - (2  + sep), chao),
-        (x - (8  + sep), chao - altura)
+        (x - ((14*z) + sep), chao),
+        (x - ((2*z)  + sep), chao),
+        (x - ((8*z)  + sep), chao - altura)
     ]
 
     for i in range(3):
@@ -194,9 +194,9 @@ def setSapo(tela, x, y, fase, viewport, lingua, zoom=1.0):
 
     # -------- pata direita --------
     pata_dir = [
-        (x + (2  + sep), chao),
-        (x + (14 + sep), chao),
-        (x + (8  + sep), chao - altura)
+        (x + ((2*z)   + sep), chao),
+        (x + ((14*z) + sep), chao),
+        (x + ((8*z)  + sep), chao - altura)
     ]
 
     for i in range(3):
